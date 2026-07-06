@@ -1,0 +1,37 @@
+﻿@model List<DapperCase7.Dtos.DashboardDtos.ReturnAnalyticsDto>
+
+<div class="chart-card" style="background:#1e1e2d; border:1px solid #323248; border-radius:16px; height:100%;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #323248; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+                <i class="fa-solid fa-triangle-exclamation" style="color:#f1416c;"></i> İade & Risk Analizi
+            </div>
+            <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">En çok iade (Durum = 5) alan varış illeri</div>
+        </div>
+        <span class="badge" style="background:rgba(241,65,108,0.15); color:#f1416c; padding:6px 12px; font-size:11px; font-weight:700;">KRİTİK TAKİP</span>
+    </div>
+    <div class="chart-body" style="padding:16px 20px;">
+        <div class="row g-3">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-xl-12">
+                    <div style="background:#151521; border:1px solid rgba(241,65,108,0.25); border-radius:12px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; transition: transform 0.15s;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:38px; height:38px; border-radius:10px; background:rgba(241,65,108,0.15); color:#f1416c; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </div>
+                            <div>
+                                <div style="color:#fff; font-size:13px; font-weight:700;">@item.CityName</div>
+                                <div style="color:#a1a5b7; font-size:11px;">Yüksek İade Oranı</div>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:16px; font-weight:800; color:#f1416c;">@item.ReturnedCount.ToString("N0")</span>
+                            <div style="font-size:10px; color:#a1a5b7;">Paket İade</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

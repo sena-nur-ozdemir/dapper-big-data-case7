@@ -1,0 +1,50 @@
+﻿@using System.Text.Json
+@model List<DapperCase7.Dtos.DashboardDtos.DailyShipmentCountDto>
+
+<div class="chart-card" style="background:#1e1e2d; border:1px solid #323248; border-radius:16px; height:100%;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #323248;">
+        <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+            <i class="fa-solid fa-chart-line" style="color:#20d489;"></i> Günlük Operasyon Hacmi Trendi
+        </div>
+        <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">Tarih bazlı işlem gören paket sayısı</div>
+    </div>
+    <div class="chart-body" style="padding:20px; position:relative; height:260px;">
+        <canvas id="dailyShipmentChart"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rawDaily = @Html.Raw(JsonSerializer.Serialize(Model));
+        const dates = rawDaily.map(x => x.Date);
+        const totals = rawDaily.map(x => x.Count);
+
+        new Chart(document.getElementById('dailyShipmentChart'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Günlük Kargo Çıkışı',
+                    data: totals,
+                    borderColor: '#009ef7',
+                    backgroundColor: 'rgba(0, 158, 247, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#009ef7',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a5b7' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a5b7' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    });
+</script>

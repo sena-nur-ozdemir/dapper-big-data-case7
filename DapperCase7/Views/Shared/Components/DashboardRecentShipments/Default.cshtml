@@ -1,0 +1,65 @@
+﻿@model List<DapperCase7.Dtos.DashboardDtos.RecentShipmentDto>
+
+<div class="chart-card" style="background:#1e1e2d; border:1px solid #323248; border-radius:16px;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #323248; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+                <i class="fa-solid fa-box-open" style="color:#ffc700;"></i> Son İşlem Gören Kargolar
+            </div>
+            <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">1.000.000 veri akışındaki en son 5 kargo hareketi</div>
+        </div>
+        <span class="badge" style="background:rgba(255,199,0,0.15); color:#ffc700; padding:6px 12px; font-size:11px;">CANLI AKIŞ</span>
+    </div>
+    <div class="table-responsive" style="padding:10px 20px;">
+        <table class="table table-dark-custom" style="margin-bottom:0; width:100%;">
+            <thead>
+                <tr>
+                    <th style="color:#a1a5b7; font-size:11px; padding:12px 10px; border-bottom:1px solid #323248;">TAKİP NO</th>
+                    <th style="color:#a1a5b7; font-size:11px; padding:12px 10px; border-bottom:1px solid #323248;">ÇIKIŞ İLİ</th>
+                    <th style="color:#a1a5b7; font-size:11px; padding:12px 10px; border-bottom:1px solid #323248;">VARIŞ İLİ</th>
+                    <th style="color:#a1a5b7; font-size:11px; padding:12px 10px; border-bottom:1px solid #323248;">TARİH</th>
+                    <th style="color:#a1a5b7; font-size:11px; padding:12px 10px; border-bottom:1px solid #323248;">ÜCRET</th>
+                    <th style="color:#a1a5b7; font-size:11px; padding:12px 10px; border-bottom:1px solid #323248;">DURUM</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr style="border-bottom:1px dashed rgba(255,255,255,0.05);">
+                        <td style="padding:14px 10px; font-family:'Courier New', monospace; font-weight:700; color:#009ef7;">@item.TrackingNumber</td>
+                        <td style="padding:14px 10px; color:#fff;">@item.SenderCity</td>
+                        <td style="padding:14px 10px; color:#fff;">@item.ReceiverCity</td>
+                        <td style="padding:14px 10px; color:#a1a5b7; font-size:12px;">@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td style="padding:14px 10px; font-weight:700; color:#20d489;">₺@item.Price.ToString("N2")</td>
+                        <td style="padding:14px 10px;">
+                            @if (item.ShipmentStatus == 1)
+                            {
+                                <span class="status-badge st-prep"><span class="dot"></span> Hazırlanıyor</span>
+                            }
+                            else if (item.ShipmentStatus == 2)
+                            {
+
+                                <span class="status-badge st-transit"><span class="dot"></span> Yolda</span>
+                            }
+                            else if (item.ShipmentStatus == 3)
+                            {
+
+                                <span class="status-badge st-delivery"><span class="dot"></span> Dağıtımda</span>
+                            }
+                            else if (item.ShipmentStatus == 4)
+                            {
+
+                                <span class="status-badge st-delivered"><span class="dot"></span> Teslim Edildi</span>
+                            }
+                            else
+                            {
+
+                                <span class="status-badge st-returned"><span class="dot"></span> İade</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

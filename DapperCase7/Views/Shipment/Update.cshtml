@@ -1,0 +1,63 @@
+﻿@model DapperCase7.Dtos.ShipmentDtos.UpdateShipmentDto
+
+@{
+    ViewData["Title"] = "Kargo Güncelle";
+    ViewData["ActivePage"] = "Shipment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-xl-6 col-lg-8">
+        <div class="chart-card" style="background:var(--surface-1); border:1px solid var(--border-color); border-radius:16px;">
+            <div class="chart-header" style="padding:20px; border-bottom:1px solid var(--border-color);">
+                <h5 style="color:var(--text-primary); font-weight:700; font-size:16px; margin:0;">
+                    <i class="fa-solid fa-pen-to-square" style="color:var(--accent-blue);"></i> Kargo Durumunu Güncelle
+                </h5>
+                <div style="color:var(--text-secondary); font-size:12px; margin-top:4px;">
+                    Takip No: <span style="color:var(--accent-teal); font-weight:700;">@Model.TrackingNumber</span>
+                </div>
+            </div>
+
+            <div class="chart-body" style="padding:30px;">
+                <form method="post" action="/Shipment/Update">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-4">
+                        <label style="color:var(--text-secondary); font-size:12px; font-weight:600; margin-bottom:8px;">ÇIKIŞ İLİ</label>
+                        <input type="text" asp-for="SenderCity" class="form-control" style="background:var(--surface-2); border:1px solid var(--border-color); color:var(--text-primary); border-radius:8px;" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label style="color:var(--text-secondary); font-size:12px; font-weight:600; margin-bottom:8px;">VARIŞ İLİ</label>
+                        <input type="text" asp-for="ReceiverCity" class="form-control" style="background:var(--surface-2); border:1px solid var(--border-color); color:var(--text-primary); border-radius:8px;" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label style="color:var(--text-secondary); font-size:12px; font-weight:600; margin-bottom:8px;">KARGO DURUMU</label>
+                        <select asp-for="ShipmentStatus" class="form-select" style="background-color:var(--surface-2); border:1px solid var(--border-color); color:var(--text-primary); border-radius:8px;">
+                            <option value="1">Hazırlanıyor</option>
+                            <option value="2">Yolda (Transfer)</option>
+                            <option value="3">Dağıtımda</option>
+                            <option value="4">Teslim Edildi</option>
+                            <option value="5">İade / Sorunlu</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label style="color:var(--text-secondary); font-size:12px; font-weight:600; margin-bottom:8px;">GÜNCEL ÜCRET (₺)</label>
+                        <input type="text" asp-for="Price" class="form-control" style="background:var(--surface-2); border:1px solid var(--border-color); color:var(--accent-teal); font-weight:700; border-radius:8px;" />
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-top:20px;">
+                        <button type="submit" class="btn" style="background:var(--accent-blue); color:#fff; font-weight:600; border-radius:8px; padding:10px 24px;">
+                            <i class="fa-solid fa-floppy-disk"></i> Değişiklikleri Kaydet
+                        </button>
+                        <a href="/Shipment/Index" class="btn" style="background:transparent; border:1px solid var(--border-color); color:var(--text-secondary); font-weight:600; border-radius:8px; padding:10px 24px;">
+                            İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

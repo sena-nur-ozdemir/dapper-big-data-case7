@@ -1,0 +1,37 @@
+﻿@model List<DapperCase7.Dtos.DashboardDtos.BusiestCityDto>
+
+<div class="chart-card" style="background:#1e1e2d; border:1px solid #323248; border-radius:16px; height:100%;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #323248;">
+        <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+            <i class="fa-solid fa-city" style="color:#ffc700;"></i> En Yoğun Çıkış Merkezleri
+        </div>
+        <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">Kargo çıkış hacmi en yüksek iller</div>
+    </div>
+    <div class="chart-body" style="padding:16px 20px;">
+        @{
+            int rank = 1;
+            int maxCount = Model.Any() ? Model.Max(x => x.ShipmentCount) : 1;
+        }
+        @foreach (var city in Model)
+        {
+            int percentage = maxCount > 0 ? (int)((double)city.ShipmentCount / maxCount * 100) : 0;
+            string barColor = rank == 1 ? "#ffc700" : (rank == 2 ? "#009ef7" : (rank == 3 ? "#20d489" : "#4d8dff"));
+
+            <div class="rank-item" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div class="rank-num" style="width:26px; height:26px; border-radius:50%; background:#2b2b40; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0;">
+                    @rank
+                </div>
+                <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:#fff; font-size:13px; font-weight:600;">@city.CityName</span>
+                        <span style="color:#a1a5b7; font-size:12px; font-weight:700;">@city.ShipmentCount.ToString("N0")</span>
+                    </div>
+                    <div class="rank-bar" style="height:5px; background:#2b2b40; border-radius:3px; overflow:hidden;">
+                        <div class="rank-fill" style="width:@percentage%; background:@barColor; height:100%; border-radius:3px; transition: width 0.8s ease;"></div>
+                    </div>
+                </div>
+            </div>
+            rank++;
+        }
+    </div>
+</div>

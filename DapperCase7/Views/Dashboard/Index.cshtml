@@ -1,0 +1,248 @@
+﻿@{
+    ViewData["Title"] = "Lojistik & Kargo Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        /* Sadece Dashboard Kartlarına Özel CSS'ler */
+        .kpi-card {
+            background: var(--surface-1);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .kpi-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            }
+
+            .kpi-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+            }
+
+        .kpi-blue::before {
+            background: linear-gradient(90deg, var(--accent-blue), #50cd89);
+        }
+
+        .kpi-green::before {
+            background: linear-gradient(90deg, var(--accent-teal), #009ef7);
+        }
+
+        .kpi-amber::before {
+            background: linear-gradient(90deg, var(--accent-amber), #f1416c);
+        }
+
+        .kpi-teal::before {
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-cyan));
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ═══════════════════════════════════════════
+                           KARGO DURUMLARI İÇİN ÖZEL ROZETLER
+                ═══════════════════════════════════════════ */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+            .status-badge .dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+            }
+
+        .st-prep {
+            background: rgba(0, 200, 255, 0.12);
+            color: #00c8ff;
+            border: 1px solid rgba(0, 200, 255, 0.25);
+        }
+
+            .st-prep .dot {
+                background: #00c8ff;
+            }
+
+        .st-transit {
+            background: rgba(26, 107, 255, 0.12);
+            color: #4d8dff;
+            border: 1px solid rgba(26, 107, 255, 0.25);
+        }
+
+            .st-transit .dot {
+                background: #4d8dff;
+                box-shadow: 0 0 6px #4d8dff;
+                animation: pulse-dot 1.5s infinite;
+            }
+
+        .st-delivery {
+            background: rgba(255, 176, 32, 0.12);
+            color: #ffb020;
+            border: 1px solid rgba(255, 176, 32, 0.25);
+        }
+
+            .st-delivery .dot {
+                background: #ffb020;
+            }
+
+        .st-delivered {
+            background: rgba(32, 212, 137, 0.12);
+            color: #20d489;
+            border: 1px solid rgba(32, 212, 137, 0.25);
+        }
+
+            .st-delivered .dot {
+                background: #20d489;
+            }
+
+        .st-returned {
+            background: rgba(241, 65, 108, 0.12);
+            color: #f1416c;
+            border: 1px solid rgba(241, 65, 108, 0.25);
+        }
+
+            .st-returned .dot {
+                background: #f1416c;
+            }
+
+        @@keyframes pulse-dot {
+            0%
+
+        {
+            transform: scale(0.9);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.5);
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: scale(0.9);
+            opacity: 1;
+        }
+
+        }
+
+        /* ═══════════════════════════════════════════
+                           GRAFİK VE TABLO KARTLARI
+                ═══════════════════════════════════════════ */
+        .chart-card {
+            background: var(--surface-1);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .chart-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-body {
+            padding: 20px;
+        }
+
+        /* Tablo satırlarına karanlık tema ayarı */
+        .table-dark-custom {
+            color: var(--text-muted);
+        }
+
+            .table-dark-custom th {
+                color: #5e6278;
+                font-weight: 600;
+                border-bottom: 1px dashed var(--border-color);
+            }
+
+            .table-dark-custom td {
+                border-bottom: 1px dashed var(--border-color);
+                padding: 12px;
+                vertical-align: middle;
+            }
+
+            .table-dark-custom tr:hover {
+                background: rgba(255,255,255,0.02);
+            }
+    </style>
+}
+
+@await Component.InvokeAsync("DashboardKpiCards")
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-8 col-lg-7">
+        @await Component.InvokeAsync("DashboardDailyShipmentCount")
+    </div>
+    <div class="col-xl-4 col-lg-5">
+        @await Component.InvokeAsync("DashboardShipmentStatus")
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-4 col-md-6">
+        @await Component.InvokeAsync("DashboardTopRoutes")
+    </div>
+    <div class="col-xl-4 col-md-6">
+        @await Component.InvokeAsync("DashboardBusiestCities")
+    </div>
+    <div class="col-xl-4 col-md-12">
+        @await Component.InvokeAsync("DashboardReturnAnalytics")
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        @await Component.InvokeAsync("DashboardShipmentMap")
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        @await Component.InvokeAsync("DashboardRecentShipments")
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Chart.js (Grafikler) için varsayılan karanlık tema ayarları
+        Chart.defaults.color = '#a1a5b7';
+        Chart.defaults.borderColor = '#323248';
+    </script>
+}

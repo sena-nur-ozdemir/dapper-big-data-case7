@@ -1,0 +1,154 @@
+﻿@using System.Text.Json
+@model List<DapperCase7.Dtos.DashboardDtos.BusiestCityDto>
+@{
+    ViewData["Title"] = "Şehir Analizi";
+    ViewData["ActivePage"] = "CityAnalysis";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Leaflet Kütüphaneleri -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="row g-4">
+    <!-- Harita Alanı (Sol Taraf) -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="chart-card" style="background:var(--surface-1); border:1px solid var(--border-color); border-radius:16px; overflow:hidden; height: 600px; display:flex; flex-direction:column;">
+            <div class="chart-header" style="padding:20px; border-bottom:1px solid var(--border-color);">
+                <h5 style="color:var(--text-primary); font-weight:700; margin:0;">
+                    <i class="fa-solid fa-map-location-dot" style="color:var(--accent-blue);"></i> Etkileşimli Çıkış Hacmi Haritası
+                </h5>
+            </div>
+            <div style="flex:1; position:relative;">
+                <!-- Haritamız burada canlanacak -->
+                <div id="cityMap" style="height: 100%; width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tıklanabilir Liste Alanı (Sağ Taraf) -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="chart-card" style="background:var(--surface-1); border:1px solid var(--border-color); border-radius:16px; height: 600px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--surface-2) transparent;">
+            <div class="chart-header" style="padding:20px; border-bottom:1px solid var(--border-color); position:sticky; top:0; background:var(--surface-1); z-index:10;">
+                <h5 style="color:var(--text-primary); font-weight:700; margin:0;">
+                    <i class="fa-solid fa-ranking-star" style="color:var(--accent-teal);"></i> Top 5 Çıkış Merkezi
+                </h5>
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">Detay görmek için bir şehre tıklayın</div>
+            </div>
+            <div class="chart-body" style="padding:20px;">
+                @{
+                    int rank = 1;
+                    int maxVol = Model.Any() ? Model.Max(x => x.ShipmentCount) : 1;
+                }
+                @foreach (var item in Model)
+                {
+                    int pct = (int)((double)item.ShipmentCount / maxVol * 100);
+                    <!-- Her bir kart click eventi için data-city tutuyor -->
+                    <div style="background:var(--surface-2); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:16px; margin-bottom:12px; cursor:pointer; transition: all 0.3s;" class="city-card" data-city="@item.CityName">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:28px; height:28px; background:rgba(0,158,247,0.1); color:var(--accent-blue); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">#@rank</div>
+                                <span style="color:#fff; font-weight:600; font-size:15px;">@item.CityName</span>
+                            </div>
+                            <span style="color:var(--accent-teal); font-weight:bold; font-size:14px;">@item.ShipmentCount.ToString("N0")</span>
+                        </div>
+                        <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                            <div style="height:100%; width:@pct%; background:linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));"></div>
+                        </div>
+                    </div>
+                    rank++;
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Haritayı Türkiye merkezli başlatıyoruz
+            var map = L.map('cityMap', { zoomControl: false }).setView([39.0, 35.5], 6);
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Veritabanında çıkış koordinatları olmadığı için JS tarafında tanımlıyoruz
+            const cityCoords = {
+                "İstanbul": [41.0082, 28.9784], "Ankara": [39.9334, 32.8597],
+                "İzmir": [38.4237, 27.1428], "Bursa": [40.1828, 29.0667],
+                "Gaziantep": [37.0662, 37.3833], "Antalya": [36.8969, 30.7133],
+                "Trabzon": [41.0027, 39.7168], "Adana": [37.0000, 35.3213],
+                "Samsun": [41.2867, 36.3300], "Muğla": [37.2154, 28.3636],
+                "Kocaeli": [40.7654, 29.9408]
+            };
+
+            const rawData = @Html.Raw(JsonSerializer.Serialize(Model));
+            var markers = {}; // Marker'ları listeye tıklandığında bulabilmek için saklıyoruz
+
+            rawData.forEach(function (city) {
+                var coords = cityCoords[city.CityName];
+                if (coords) {
+                    // Kargo hacmine göre nokta boyutunu (yarıçap) dinamik hesapla
+                    var radiusSize = Math.max(12, Math.min(35, city.ShipmentCount / 5000));
+
+                    var marker = L.circleMarker(coords, {
+                        color: '#009ef7',
+                        fillColor: '#00c8ff',
+                        fillOpacity: 0.5,
+                        radius: radiusSize,
+                        weight: 2
+                    }).addTo(map);
+
+                    marker.bindPopup(`
+                        <div style="text-align:center; padding:8px; min-width:120px;">
+                            <div style="font-size:16px; font-weight:800; color:#009ef7; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:5px;">${city.CityName}</div>
+                            <div style="font-size:11px; color:#a1a5b7; text-transform:uppercase; font-weight:600;">Çıkış Hacmi</div>
+                            <div style="font-size:18px; font-weight:800; color:#20d489;">${city.ShipmentCount.toLocaleString('tr-TR')}</div>
+                        </div>
+                    `, { className: 'custom-popup' });
+
+                    markers[city.CityName] = marker;
+                }
+            });
+
+            // "Basalım öyle görelim" Etkileşimi: Sağdaki kartlara tıklayınca çalışan animasyon
+            document.querySelectorAll('.city-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    var cityName = this.getAttribute('data-city');
+                    var targetMarker = markers[cityName];
+
+                    if (targetMarker) {
+                        // Haritayı o şehre doğru havalı bir şekilde kaydır ve yakınlaştır
+                        map.flyTo(targetMarker.getLatLng(), 8, {
+                            duration: 1.5,
+                            easeLinearity: 0.25
+                        });
+
+                        // Uçuş bittikten sonra Popup'ı aç
+                        setTimeout(() => {
+                            targetMarker.openPopup();
+                        }, 1500);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <style>
+        /* Popup ve Kart Hover Ayarları */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: #1e1e2d;
+            color: #fff;
+            border: 1px solid #323248;
+        }
+
+        .city-card:hover {
+            transform: translateX(-5px);
+            border-color: var(--accent-blue) !important;
+            background: rgba(0, 158, 247, 0.05) !important;
+        }
+    </style>
+}

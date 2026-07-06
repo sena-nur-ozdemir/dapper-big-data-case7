@@ -1,0 +1,38 @@
+﻿@model List<DapperCase7.Dtos.DashboardDtos.TopRouteDto>
+
+<div class="chart-card" style="background:#1e1e2d; border:1px solid #323248; border-radius:16px; height:100%;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #323248;">
+        <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+            <i class="fa-solid fa-route" style="color:#009ef7;"></i> En Yoğun Sevkiyat Rotaları
+        </div>
+        <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">En çok kargo trafiği olan hatlar</div>
+    </div>
+    <div class="chart-body" style="padding:16px 20px;">
+        @{
+            int index = 1;
+        }
+        @foreach (var route in Model)
+        {
+            string rankClass = index == 1 ? "gold" : (index == 2 ? "silver" : (index == 3 ? "bronze" : ""));
+            string numColor = index <= 3 ? "#fff" : "#a1a5b7";
+            string bgNum = index == 1 ? "rgba(255,199,0,0.2)" : (index == 2 ? "rgba(148,163,184,0.2)" : (index == 3 ? "rgba(180,83,9,0.2)" : "#2b2b40"));
+            string textAccent = index == 1 ? "#ffc700" : (index == 2 ? "#009ef7" : "#20d489");
+
+            <div class="rank-item" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <div class="rank-num @rankClass" style="width:26px; height:26px; border-radius:50%; background:@bgNum; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:@textAccent; flex-shrink:0;">
+                    @index
+                </div>
+                <div style="flex:1;">
+                    <div style="color:#fff; font-size:13px; font-weight:600;">
+                        @route.SenderCity <i class="fa-solid fa-arrow-right-long" style="font-size:11px; color:#009ef7; margin:0 4px;"></i> @route.ReceiverCity
+                    </div>
+                    <div style="color:#a1a5b7; font-size:11px;">Ciro: <span style="color:#20d489; font-weight:600;">₺@route.TotalRevenue.ToString("N0")</span></div>
+                </div>
+                <div class="rank-value" style="font-size:13px; font-weight:700; color:#fff;">
+                    @route.ShipmentCount.ToString("N0") <span style="font-size:10px; color:#a1a5b7; font-weight:500;">adet</span>
+                </div>
+            </div>
+            index++;
+        }
+    </div>
+</div>

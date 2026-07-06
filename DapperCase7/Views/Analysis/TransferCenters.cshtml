@@ -1,0 +1,142 @@
+﻿@using System.Text.Json
+@model List<DapperCase7.Dtos.DashboardDtos.TopRouteDto>
+@{
+    ViewData["Title"] = "Transfer Merkezleri & Rotalar";
+    ViewData["ActivePage"] = "TransferCenters";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Barları orantılı çizmek için listedeki en yüksek kargo hacmini buluyoruz
+    int maxCount = Model.Any() ? Model.Max(x => x.ShipmentCount) : 1;
+    int rank = 1;
+}
+
+<div class="row g-4">
+    <div class="col-xl-8 col-lg-7">
+        <div class="chart-card" style="background:var(--surface-1); border:1px solid var(--border-color); border-radius:16px;">
+            <div class="chart-header" style="padding:20px; border-bottom:1px solid var(--border-color);">
+                <h5 style="color:var(--text-primary); font-weight:700; margin:0;">
+                    <i class="fa-solid fa-route" style="color:var(--accent-blue);"></i> En Yoğun Sevkiyat Hatları (Hacim Bazlı)
+                </h5>
+            </div>
+
+            <div class="chart-body" style="padding:20px;">
+                @foreach (var item in Model)
+                {
+                    int percent = (int)((double)item.ShipmentCount / maxCount * 100);
+
+                    <div class="route-card" style="background:var(--surface-2); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:16px 20px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; transition: all 0.3s;">
+
+                        <div style="display:flex; align-items:center; gap:15px; min-width: 180px;">
+                            <div style="width:40px; height:40px; border-radius:10px; background:rgba(0,158,247,0.1); color:var(--accent-blue); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900;">
+                                #@rank
+                            </div>
+                            <div>
+                                <div style="color:#fff; font-size:14px; font-weight:700;">
+                                    @item.SenderCity <i class="fa-solid fa-arrow-right-long" style="color:var(--text-muted); margin:0 6px;"></i> @item.ReceiverCity
+                                </div>
+                                <div style="color:var(--text-secondary); font-size:11px; margin-top:4px;">Ana Lojistik Hattı</div>
+                            </div>
+                        </div>
+
+                        <div style="flex-grow:1; min-width:150px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                                <span style="color:var(--text-secondary); font-size:11px; font-weight:600;">Operasyon Hacmi</span>
+                                <span style="color:var(--accent-teal); font-weight:bold; font-size:12px;">@item.ShipmentCount.ToString("N0") kargo</span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; width:@percent%; background:linear-gradient(90deg, var(--accent-blue), var(--accent-teal)); border-radius:3px;"></div>
+                            </div>
+                        </div>
+
+                        <div style="text-align:right; min-width: 100px;">
+                            <div style="color:var(--text-secondary); font-size:11px; font-weight:600; margin-bottom:2px;">Toplam Ciro</div>
+                            <div style="color:#fff; font-size:16px; font-weight:800; letter-spacing: 0.5px;">₺@item.TotalRevenue.ToString("N0")</div>
+                        </div>
+
+                    </div>
+                    rank++;
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-5">
+        <div class="chart-card" style="background:var(--surface-1); border:1px solid var(--border-color); border-radius:16px; height:100%; display:flex; flex-direction:column;">
+            <div class="chart-header" style="padding:20px; border-bottom:1px solid var(--border-color);">
+                <h5 style="color:var(--text-primary); font-weight:700; margin:0;">
+                    <i class="fa-solid fa-chart-pie" style="color:var(--accent-teal);"></i> Ciro Dağılım Analizi
+                </h5>
+                <div style="color:var(--text-secondary); font-size:11px; margin-top:4px;">Top 5 rotanın toplam gelir içerisindeki payları</div>
+            </div>
+
+            <div class="chart-body" style="padding:20px; flex:1; display:flex; align-items:center; justify-content:center; position:relative;">
+                <canvas id="revenueChart" style="max-height: 320px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rawData = @Html.Raw(JsonSerializer.Serialize(Model));
+            // Etiketleri "A Şehri - B Şehri" formatında birleştiriyoruz
+            const labels = rawData.map(x => x.SenderCity + ' - ' + x.ReceiverCity);
+            const revenueData = rawData.map(x => x.TotalRevenue);
+
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: revenueData,
+                        backgroundColor: [
+                            '#009ef7', /* Mavi */
+                            '#20d489', /* Turkuaz/Yeşil */
+                            '#ffc700', /* Sarı */
+                            '#f1416c', /* Kırmızı */
+                            '#8950fc'  /* Mor */
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#181818', /* Grafiğin arka planıyla aynı renk kesikler */
+                        hoverOffset: 8 /* Üzerine gelince dilimin dışarı taşma efekti */
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%', /* Grafiğin ortasındaki boşluğun kalınlığı */
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a1a5b7', font: { size: 11 }, padding: 15, usePointStyle: true }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e1e2d',
+                            titleColor: '#fff',
+                            bodyColor: '#20d489',
+                            borderColor: '#323248',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ₺' + context.parsed.toLocaleString('tr-TR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Kartların üzerine gelince hafifçe büyüyüp parlaması için CSS */
+        .route-card:hover {
+            transform: scale(1.02);
+            border-color: var(--accent-blue) !important;
+            background: rgba(0, 158, 247, 0.05) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+}

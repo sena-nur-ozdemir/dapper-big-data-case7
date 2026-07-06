@@ -1,0 +1,62 @@
+﻿@using System.Text.Json
+@model List<DapperCase7.Dtos.DashboardDtos.ShipmentStatusDto>
+
+<div class="chart-card" style="background:#1e1e2d; border:1px solid #323248; border-radius:16px; height:100%;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #323248;">
+        <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+            <i class="fa-solid fa-chart-pie" style="color:#009ef7;"></i> Kargo Operasyon Dağılımı
+        </div>
+        <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">Statülere göre genel paket hacmi</div>
+    </div>
+    <div class="chart-body" style="padding:20px; position:relative; height:260px;">
+        <canvas id="shipmentStatusChart"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // SQL'den gelen integer statüleri (1..5) anlamlı metinlere çeviriyoruz
+        const statusMap = {
+            1: 'Hazırlanıyor',
+            2: 'Yolda (Transfer)',
+            3: 'Dağıtımda',
+            4: 'Teslim Edildi',
+            5: 'İade / Sorunlu'
+        };
+
+        const rawData = @Html.Raw(JsonSerializer.Serialize(Model));
+        const labels = rawData.map(x => statusMap[x.ShipmentStatus] || 'Diğer');
+        const counts = rawData.map(x => x.Count);
+
+        new Chart(document.getElementById('shipmentStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: [
+                        '#00c8ff', // 1: Hazırlanıyor (Cyan)
+                        '#4d8dff', // 2: Yolda (Mavi)
+                        '#ffb020', // 3: Dağıtımda (Turuncu)
+                        '#20d489', // 4: Teslim Edildi (Yeşil)
+                        '#f1416c'  // 5: İade (Kırmızı)
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#1e1e2d',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#a1a5b7', font: { size: 11 }, boxWidth: 10, padding: 12 }
+                    }
+                }
+            }
+        });
+    });
+</script>

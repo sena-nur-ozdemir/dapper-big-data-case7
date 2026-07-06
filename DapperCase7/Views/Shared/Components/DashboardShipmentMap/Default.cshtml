@@ -1,0 +1,86 @@
+﻿@using System.Text.Json
+@model List<DapperCase7.Dtos.DashboardDtos.TopRouteDto>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-ant-path@1.3.0/dist/leaflet-ant-path.js"></script>
+
+<div class="chart-card" style="background:#181818; border:1px solid #2a2a2a; border-radius:16px; overflow:hidden;">
+    <div class="chart-header" style="padding:18px 20px; border-bottom:1px solid #2a2a2a; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <div class="chart-title" style="color:#fff; font-weight:700; font-size:15px;">
+                <i class="fa-solid fa-map-location-dot" style="color:#009ef7;"></i> Türkiye Canlı Lojistik Ağı
+            </div>
+            <div style="color:#a1a5b7; font-size:11px; margin-top:2px;">Gerçek zamanlı en yoğun rotalar (A ➔ B Akışı)</div>
+        </div>
+        <span class="badge" style="background:rgba(0,158,247,0.15); color:#009ef7; padding:6px 12px; font-size:11px; font-weight:700;"><i class="fa-solid fa-satellite-dish"></i> CANLI AĞ</span>
+    </div>
+    <div class="chart-body" style="padding:0; position:relative;">
+        <div id="shipmentMap" style="height: 420px; width:100%;"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var map = L.map('shipmentMap', { zoomControl: false }).setView([39.0, 35.5], 6);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        // Veritabanında çıkış noktaları olmadığı için JS tarafında illerin koordinatlarını tanımlıyoruz
+        const cityCoords = {
+            "İstanbul": [41.0082, 28.9784], "Ankara": [39.9334, 32.8597],
+            "İzmir": [38.4237, 27.1428], "Bursa": [40.1828, 29.0667],
+            "Gaziantep": [37.0662, 37.3833], "Antalya": [36.8969, 30.7133],
+            "Trabzon": [41.0027, 39.7168], "Adana": [37.0000, 35.3213],
+            "Samsun": [41.2867, 36.3300], "Muğla": [37.2154, 28.3636],
+            "Kocaeli": [40.7654, 29.9408]
+        };
+
+        // SQL'den gelen gerçek rota verimiz!
+        var topRoutes = @Html.Raw(JsonSerializer.Serialize(Model));
+
+        topRoutes.forEach(function (route) {
+            var sender = cityCoords[route.SenderCity];
+            var receiver = cityCoords[route.ReceiverCity];
+
+            if (sender && receiver) {
+                // Çıkış (Sarı) ve Varış (Mavi) Noktaları
+                L.circleMarker(sender, { color: '#ffc700', radius: 4, weight: 2, fillOpacity: 1 }).addTo(map);
+                L.circleMarker(receiver, { color: '#009ef7', radius: 6, weight: 2, fillOpacity: 1 }).addTo(map);
+
+                // Hareketli Kargo Akışı (AntPath Animasyonu)
+                var antPolyline = L.polyline.antPath([sender, receiver], {
+                    "delay": 400,
+                    "dashArray": [12, 25],
+                    "weight": 3,
+                    "color": "#009ef7", /* Arka çizgi rengi */
+                    "pulseColor": "#20d489", /* Akan kargonun rengi (Yeşil) */
+                    "paused": false,
+                    "reverse": false,
+                    "hardwareAccelerated": true
+                }).addTo(map);
+
+                // Üzerine tıklanınca detay çıksın
+                antPolyline.bindPopup(`
+                    <div style="text-align:center;">
+                        <div style="font-size:13px; font-weight:800; color:#fff;">${route.SenderCity} <i class="fa-solid fa-arrow-right" style="color:#009ef7;"></i> ${route.ReceiverCity}</div>
+                        <div style="font-size:12px; color:#20d489; margin-top:4px;">${route.ShipmentCount.toLocaleString('tr-TR')} Kargo</div>
+                    </div>
+                `, { className: 'custom-popup' });
+            }
+        });
+    });
+</script>
+
+<style>
+    /* Popup'ı siyah temamıza uyarlamak için ufak bir dokunuş */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+        background: #1e1e2d;
+        color: #fff;
+        border: 1px solid #323248;
+    }
+</style>
