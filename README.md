@@ -103,4 +103,4 @@ Bu proje, modern yazılım mühendisliği pratiklerine uygun olarak yapay zeka d
 </details>
 
 ---
-**👩‍💻 Developer:** Sena Nur Özdemir — [GitHub Profilim](https://github.com/senanur-ozdemir)
+**👩‍💻 Developer:** Sena Nur Özdemir — [GitHub Profilim](https://github.com/sena-nur-ozdemir)
