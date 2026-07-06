@@ -81,7 +81,8 @@ Bu proje, modern yazılım mühendisliği pratiklerine uygun olarak yapay zeka d
   <br>
   <i>Server-Side Paging (Sunucu taraflı sayfalama) ile 1.000.000 verinin tarayıcıyı dondurmadan listelendiği, anlık CRUD ve arama işlemlerinin yapıldığı ekranlar.</i>
   <br><br>
-  <img width="3788" height="2592" alt="localhost_7221_Shipment_Index (1)" src="https://github.com/user-attachments/assets/50aa30bb-61fb-468f-93f0-387a5bb6ca44" />
+  <img width="1920" height="1098" alt="screencapture-localhost-7221-Shipment-Index-2026-07-07-02_38_27" src="https://github.com/user-attachments/assets/c5dfd4b9-30b5-4364-a472-c1356d00f9ef" />
+
   <img width="1917" height="867" alt="dapper2" src="https://github.com/user-attachments/assets/c970abc9-4e61-4276-b335-0c4f5a5506e2" />
 
   <br>
